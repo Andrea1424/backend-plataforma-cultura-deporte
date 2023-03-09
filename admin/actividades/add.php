@@ -43,8 +43,7 @@ if (!isset($params->idInstructor) || !isset($params->actividad) || !isset($param
   $publicar = mysqli_real_escape_string($conexion,$params->publicar);
 }
 
-
-$res = mysqli_query($conexion, "SELECT * FROM `actividades` WHERE `actividad`='" . $params->actividad . "'"); // Consulta para saber si ya existe ese valor
+$res = mysqli_query($conexion, "SELECT * FROM `actividades` WHERE `actividad`='" . $actividad . "'"); // Consulta para saber si ya existe ese valor
 
 // Sino se necesita verificar que ya existe ese registro omitir el if y solo hacer la consulta
 
@@ -63,15 +62,15 @@ if ($res->num_rows > 0) { // Si la consulta dió algún registro significa que y
     $response->mensaje   = 'No se pudo registrar'; // Respuesta que se le dará al frontend
     echo json_encode($response); // Respuesta de la API
       exit();
-    }
+  }
     
-    if ($resultado) { // Si la consulta SQL no dió error entrará en el if
-      $response->resultado = true; // Mensaje de éxito porque ya se registró
-      $response->mensaje   = 'Datos guardados'; // Respuesta que se le dará al frontend
-    } else { // Si la consulta SQL dió error entrará en el else
-      $response->resultado = false; // Mensaje de error porque hubo algún error
-      $response->mensaje   = 'Error interno'; // Respuesta que se le dará al frontend
-    }
+  if ($resultado) { // Si la consulta SQL no dió error entrará en el if
+    $response->resultado = true; // Mensaje de éxito porque ya se registró
+    $response->mensaje   = 'Datos guardados'; // Respuesta que se le dará al frontend
+  } else { // Si la consulta SQL dió error entrará en el else
+    $response->resultado = false; // Mensaje de error porque hubo algún error
+    $response->mensaje   = 'Error interno'; // Respuesta que se le dará al frontend
+  }
 }
 
 echo json_encode($response); // Respuesta de la API
