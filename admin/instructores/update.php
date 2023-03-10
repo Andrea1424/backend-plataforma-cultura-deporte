@@ -27,7 +27,7 @@ if ($params == null) {
   exit();
 }
 
-if (!isset($params->nombre) || !isset($params->apellidos) || !isset($params->email) || !isset($params->telefono) || !isset($params->tituloAcademico)) {
+if (!isset($params->nombre) || !isset($params->apellidos) || !isset($params->email) || !isset($params->telefono) || !isset($params->tituloAcademico) || !isset($_GET['idInstructor'])) {
   $response->resultado = false;
   $response->mensaje   = "Datos incompletos";
     
@@ -39,6 +39,7 @@ if (!isset($params->nombre) || !isset($params->apellidos) || !isset($params->ema
   $email = mysqli_real_escape_string($conexion,$params->email);
   $telefono = mysqli_real_escape_string($conexion,$params->telefono);
   $tituloAcademico = mysqli_real_escape_string($conexion,$params->tituloAcademico);
+  $idInstructor = mysqli_real_escape_string($conexion,$_GET['idInstructor']);
 }
 
 $res = mysqli_query($conexion, "SELECT * FROM `instructores` WHERE `email`='".$email."' OR `telefono` = '".$telefono."'"); // Consulta para saber si ya existe ese valor

@@ -44,7 +44,7 @@ material varchar(255) not null,
 publicar int(1) not null
 );
 
-create table instructor(
+create table instructores(
 idInstructor int(11) PRIMARY KEY AUTO_INCREMENT,
 nombre varchar(255) not null,
 apellidos varchar(255) not null,
@@ -54,7 +54,7 @@ telefono varchar(10) not null,
 tituloAcademico varchar(255) not null
 );
 
-create table publicacion(
+create table publicaciones(
 idPublicacion int(11) primary key auto_increment,
 idInstructor int(11)  not null,
 idActividad int(11) not null,

@@ -31,7 +31,7 @@ $registros=mysqli_query($conexion,"SELECT * FROM `instructores` WHERE `idInstruc
 
 if(!$registros->num_rows > 0) { // Si la consulta dió algún registro significa que ya existe y entra en el if
     $response->resultado = false; // Mensaje de error porque ya existe un registro
-    $response->mensaje = 'Esa carrera no existe'; // Respuesta que se le dará al frontend
+    $response->mensaje = 'Ese instructor no existe'; // Respuesta que se le dará al frontend
 
     echo json_encode($response); // Respuesta de la API
     exit();
