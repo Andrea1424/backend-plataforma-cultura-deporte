@@ -1,17 +1,47 @@
 <?php
+header('Content-Type: text/html');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Credentials: true');
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
 
-$json = file_get_contents('php://input');
-$params = json_decode($json);
+class Result{} // Creacion de la clase
+$response = new Result(); // Instancia para la respuesta de la API
 
-require "../../config/conexion.php";
+if ($_SERVER['REQUEST_METHOD'] != 'PUT') {
+  $response->resultado = false;
+  $response->mensaje   = "Metodo incorrecto";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+} else {
+  $json   = file_get_contents('php://input'); // Tipo JSON para peticiones http
+  $params = json_decode($json); // Se guarda en la variable $params
+  require "../../config/conexion.php"; // Trae la conexión de la base de datos
+}
 
-$response = new Result();
-class Result {}
+if ($params == null) {
+  $response->resultado = false;
+  $response->mensaje   = "No hay datos para procesar";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+}
 
-$res = mysqli_query($conexion, "SELECT * FROM `instructores` WHERE `email`='".$params->email."' OR `telefono` = '".$params->telefono."'"); // Consulta para saber si ya existe ese valor
+if (!isset($params->nombre) || !isset($params->apellidos) || !isset($params->email) || !isset($params->telefono) || !isset($params->tituloAcademico)) {
+  $response->resultado = false;
+  $response->mensaje   = "Datos incompletos";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+}else{
+  $nombre = mysqli_real_escape_string($conexion,$params->nombre);
+  $apellidos = mysqli_real_escape_string($conexion,$params->apellidos);
+  $email = mysqli_real_escape_string($conexion,$params->email);
+  $telefono = mysqli_real_escape_string($conexion,$params->telefono);
+  $tituloAcademico = mysqli_real_escape_string($conexion,$params->tituloAcademico);
+}
+
+$res = mysqli_query($conexion, "SELECT * FROM `instructores` WHERE `email`='".$email."' OR `telefono` = '".$telefono."'"); // Consulta para saber si ya existe ese valor
    
 // Sino se necesita verificar que ya existe ese registro omitir el if y solo hacer la consulta
 
@@ -20,7 +50,17 @@ if($res->num_rows > 0) { // Si la consulta dió algún registro significa que ya
   $response->mensaje = 'Instructor existente'; // Respuesta que se le dará al frontend
 }else{ // Si la consulta no dío algún registro significa que no existe y entra en el else
 
-  $resultado = mysqli_query($conexion,"UPDATE `instructores` SET `nombre` = '".$params->nombre."', `apellidos` = '".$params->apellidos."', `email` = '".$params->email."', `telefono` = '".$params->telefono."', `tituloAcademico` = '".$params->tituloAcademico."' WHERE `instructores`.`idInstructor` = '".$_GET['idInstructor']."';");
+
+  try {      
+    $resultado = null;    
+    // Consulta SQL que se debe aplicar para el registro
+    $resultado = mysqli_query($conexion,"UPDATE `instructores` SET `nombre` = '".$nombre."', `apellidos` = '".$apellidos."', `email` = '".$email."', `telefono` = '".$telefono."', `tituloAcademico` = '".$tituloAcademico."' WHERE `instructores`.`idInstructor` = '".$idInstructor."';");
+  }catch (Exception $e) {
+    $response->resultado = false; // Mensaje de error porque hubo algún error
+    $response->mensaje   = 'No se pudo registrar'; // Respuesta que se le dará al frontend
+    echo json_encode($response); // Respuesta de la API
+      exit();
+  }
 
   if($resultado){
     $response->resultado = true;
@@ -31,6 +71,5 @@ if($res->num_rows > 0) { // Si la consulta dió algún registro significa que ya
   }
 }
 
-  header('Content-Type: text/html');
   echo json_encode($response);
   ?>

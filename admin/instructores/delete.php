@@ -1,11 +1,32 @@
 <?php
+  header('Content-Type: application/json');
   header('Access-Control-Allow-Origin: *'); // Es para controlar la dirección IP o dominio de donde se hace la petición
   header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept"); // Es para recibir el tipo de dato
 
-  require "../../config/conexion.php"; // Trae la conexión de la base de datos
+  class Result{} // Creacion de la clase
+  $response = new Result(); // Instancia para la respuesta de la API
+  
+  if ($_SERVER['REQUEST_METHOD'] != 'DELETE') {
+    $response->resultado = false;
+    $response->mensaje   = "Metodo incorrecto";
+      
+    echo json_encode($response); // Respuesta de la API
+    exit();
+  } else {
+    require "../../config/conexion.php"; // Trae la conexión de la base de datos
+  }
 
+  if (!isset($_GET['idInstructor'])) {
+    $response->resultado = false;
+    $response->mensaje   = "Datos incompletos";
+      
+    echo json_encode($response); // Respuesta de la API
+    exit();
+  }else{
+    $idInstructor = mysqli_real_escape_string($conexion,$_GET['idInstructor']);
+  }
   // Consulta SQL que se debe aplicar para eliminar un registro
-  $delete = mysqli_query($conexion,"DELETE FROM `instructores` WHERE `instructores`.`idInstructor`= '".$_GET['idInstructor']."'"); // Se obtiene de la peticion GET en la URL
+  $delete = mysqli_query($conexion,"DELETE FROM `instructores` WHERE `instructores`.`idInstructor`= '".$idInstructor."'"); // Se obtiene de la peticion GET en la URL
 
   class Result {} // Creacion de la clase
   $response = new Result(); // Instancia para la respuesta de la API
@@ -17,6 +38,5 @@
     $response->resultado = false; // Mensaje de error porque hubo algún error
     $response->mensaje = 'No se pudo eliminar'; // Respuesta que se le dará al frontend
   }
-  header('Content-Type: application/json');
   echo json_encode($response);
 ?>

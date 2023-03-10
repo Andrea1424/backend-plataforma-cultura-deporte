@@ -4,7 +4,7 @@ http://localhost/tutorias/admin/comentarios/add.php
 {
   "idPublicacion" : 1,
   "idUsuario" : 1,
-  "comentario" : "Tutoria deportiva GOD"
+  "reaccion" : "Me gusta"
 }
 
 # Eliminar una reaccion
@@ -30,4 +30,4 @@ http://localhost/tutorias/admin/reacciones/update.php?idReaccion=1
   "idPublicacion" : 1,
   "idUsuario" : 1,
   "reaccion" : "Me gusta"
-} 
+}

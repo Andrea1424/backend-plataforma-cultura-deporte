@@ -3,8 +3,18 @@ header('Content-Type: application/json, text/plain, */*'); // Tipo de archivo qu
 header('Access-Control-Allow-Origin: *'); // Es para controlar la dirección IP o dominio de donde se hace la petición
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept"); // Es para recibir el tipo de dato
 
-require "../../config/conexion.php"; // Trae la conexión de la base de datos
+class Result{} // Creacion de la clase
+$response = new Result(); // Instancia para la respuesta de la API
 
+if ($_SERVER['REQUEST_METHOD'] != 'GET') {
+    $response->resultado = false;
+    $response->mensaje   = "Metodo incorrecto";
+      
+    echo json_encode($response); // Respuesta de la API
+    exit();
+} else {
+    require "../../config/conexion.php"; // Trae la conexión de la base de datos
+}
 // Consulta SQL que se debe aplicar para traer los registros
 $registros=mysqli_query($conexion,"SELECT * FROM `actividades_usuarios`");
 

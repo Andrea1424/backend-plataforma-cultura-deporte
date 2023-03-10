@@ -4,15 +4,43 @@ header('Access-Control-Allow-Origin: *'); // Es para controlar la dirección IP 
 header('Access-Control-Allow-Credentials: true'); // Es para controlar quien tiene acceso
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method"); // Es para recibir el tipo de dato
 
-$json = file_get_contents('php://input'); // Tipo JSON para peticiones http
-$params = json_decode($json); // Se guarda en la variable $params
-
-require "../../config/conexion.php"; // Trae la conexión de la base de datos
-
-class Result {} // Creacion de la clase
+class Result{} // Creacion de la clase
 $response = new Result(); // Instancia para la respuesta de la API
 
-$res = mysqli_query($conexion, "SELECT * FROM `actividades_usuarios` WHERE `idUsuario`='".$params->idUsuario."'"); // Consulta para saber si ya existe ese valor
+if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+  $response->resultado = false;
+  $response->mensaje   = "Metodo incorrecto";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+} else {
+  $json   = file_get_contents('php://input'); // Tipo JSON para peticiones http
+  $params = json_decode($json); // Se guarda en la variable $params
+  require "../../config/conexion.php"; // Trae la conexión de la base de datos
+}
+
+if ($params == null) {
+  $response->resultado = false;
+  $response->mensaje   = "No hay datos para procesar";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+}
+
+if (!isset($params->idActividad) || !isset($params->idUsuario) || !isset($params->estado) || !isset($params->liberacion)) {
+  $response->resultado = false;
+  $response->mensaje   = "Datos incompletos";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+}else{
+  $idActividad = mysqli_real_escape_string($conexion,$params->idActividad);
+  $idUsuario = mysqli_real_escape_string($conexion,$params->idUsuario);
+  $estado = mysqli_real_escape_string($conexion,$params->estado);
+  $liberacion = mysqli_real_escape_string($conexion,$params->liberacion);
+}
+
+$res = mysqli_query($conexion, "SELECT * FROM `actividades_usuarios` WHERE `idUsuario`='".$idUsuario."'"); // Consulta para saber si ya existe ese valor
    
 // Sino se necesita verificar que ya existe ese registro omitir el if y solo hacer la consulta
 
@@ -23,7 +51,7 @@ if($res->num_rows > 0) { // Si la consulta dió algún registro significa que ya
 
   // Consulta SQL que se debe aplicar para el registro
   $resultado = mysqli_query($conexion,"INSERT INTO `actividades_usuarios` (`idActividadUsuario`, `idActividad`, `idUsuario`, `estado`, `liberacion`)
-  VALUES (NULL, '".$params->idActividad."', '".$params->idUsuario."', '".$params->estado."', '".$params->liberacion."')");
+  VALUES (NULL, '".$idActividad."', '".$idUsuario."', '".$estado."', '".$liberacion."')");
 
   if($resultado){ // Si la consulta SQL no dió error entrará en el if
     $response->resultado = true; // Mensaje de éxito porque ya se registró

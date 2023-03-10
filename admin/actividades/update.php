@@ -1,17 +1,49 @@
 <?php
+header('Content-Type: text/html');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Credentials: true');
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
 
-$json = file_get_contents('php://input');
-$params = json_decode($json);
+class Result{} // Creacion de la clase
+$response = new Result(); // Instancia para la respuesta de la API
 
-require "../../config/conexion.php";
+if ($_SERVER['REQUEST_METHOD'] != 'PUT') {
+  $response->resultado = false;
+  $response->mensaje   = "Metodo incorrecto";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+} else {
+  $json   = file_get_contents('php://input'); // Tipo JSON para peticiones http
+  $params = json_decode($json); // Se guarda en la variable $params
+  require "../../config/conexion.php"; // Trae la conexión de la base de datos
+}
 
-$response = new Result();
-class Result {}
+if ($params == null) {
+  $response->resultado = false;
+  $response->mensaje   = "No hay datos para procesar";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+}
 
-$res = mysqli_query($conexion, "SELECT * FROM `actividades` WHERE `actividad`='".$params->actividad."'"); // Consulta para saber si ya existe ese valor
+$response->mensaje   = "Datos incompletos";
+$response->resultado = false;
+
+if (!isset($params->idInstructor) || !isset($_GET['idActividad']) || !isset($params->actividad) || !isset($params->cupo) || !isset($params->lugar) || !isset($params->descripcion) || !isset($params->material) || !isset($params->publicar)) {
+  echo json_encode($response); // Respuesta de la API
+  exit();
+}else{
+  $idActividad = mysqli_real_escape_string($conexion,$_GET['idActividad']);
+  $idInstructor = mysqli_real_escape_string($conexion,$params->idInstructor);
+  $cupo = mysqli_real_escape_string($conexion,$params->cupo);
+  $lugar = mysqli_real_escape_string($conexion,$params->lugar);
+  $descripcion = mysqli_real_escape_string($conexion,$params->descripcion);
+  $material = mysqli_real_escape_string($conexion,$params->material);
+  $publicar = mysqli_real_escape_string($conexion,$params->publicar);
+}
+
+$res = mysqli_query($conexion, "SELECT * FROM `actividades` WHERE `actividad`='".$actividad."'"); // Consulta para saber si ya existe ese valor
    
 // Sino se necesita verificar que ya existe ese registro omitir el if y solo hacer la consulta
 
@@ -20,17 +52,25 @@ if($res->num_rows > 0) { // Si la consulta dió algún registro significa que ya
   $response->mensaje = 'Actividad existente'; // Respuesta que se le dará al frontend
 }else{ // Si la consulta no dío algún registro significa que no existe y entra en el else
 
-  $resultado = mysqli_query($conexion,"UPDATE `actividades` SET `actividad` = '".$params->actividad."', `cupo` = '".$params->cupo."', `lugar` = '".$params->lugar."', `descripcion` = '".$params->descripcion."', `material` = '".$params->material."', `publicar` = '".$params->publicar."' WHERE `actividades`.`idActividad` = '".$_GET['idActividad']."';");
+  try {      
+    $resultado = null;    
+    // Consulta SQL que se debe aplicar para el registro
+    $resultado = mysqli_query($conexion,"UPDATE `actividades` SET `actividad` = '".$actividad."', `cupo` = '".$cupo."', `lugar` = '".$lugar."', `descripcion` = '".$descripcion."', `material` = '".$material."', `publicar` = '".$publicar."' WHERE `actividades`.`idActividad` = '".$idActividad."';");
+  }catch (Exception $e) {
+    $response->resultado = false; // Mensaje de error porque hubo algún error
+    $response->mensaje   = 'No se pudo registrar'; // Respuesta que se le dará al frontend
+    echo json_encode($response); // Respuesta de la API
+      exit();
+  }
 
   if($resultado){
     $response->resultado = true;
     $response->mensaje = 'Actualización correcta';
   } else {
     $response->resultado = false;
-    $response->mensaje = 'No se pudo actualizar';
+    $response->mensaje = 'Error interno';
   }
 }
 
-  header('Content-Type: text/html');
   echo json_encode($response);
   ?>

@@ -4,17 +4,53 @@ header('Access-Control-Allow-Origin: *'); // Es para controlar la dirección IP 
 header('Access-Control-Allow-Credentials: true'); // Es para controlar quien tiene acceso
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method"); // Es para recibir el tipo de dato
 
-$json = file_get_contents('php://input'); // Tipo JSON para peticiones http
-$params = json_decode($json); // Se guarda en la variable $params
-
-require "../../config/conexion.php"; // Trae la conexión de la base de datos
-
-class Result {} // Creacion de la clase
+class Result{} // Creacion de la clase
 $response = new Result(); // Instancia para la respuesta de la API
 
-// Consulta SQL que se debe aplicar para el registro
-$resultado = mysqli_query($conexion,"INSERT INTO `horarios` (`idHorario`,	`idActividad`,	`dia`,	`hora_inicio`,	`hora_fin`)
-VALUES (NULL, '".$params->idActividad."', '".$params->dia."', '".$params->hora_inicio."', '".$params->hora_fin."');");
+if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+  $response->resultado = false;
+  $response->mensaje   = "Metodo incorrecto";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+} else {
+  $json   = file_get_contents('php://input'); // Tipo JSON para peticiones http
+  $params = json_decode($json); // Se guarda en la variable $params
+  require "../../config/conexion.php"; // Trae la conexión de la base de datos
+}
+
+if ($params == null) {
+  $response->resultado = false;
+  $response->mensaje   = "No hay datos para procesar";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+}
+
+if (!isset($params->idActividad) || !isset($params->dia) || !isset($params->hora_inicio) || !isset($params->hora_fin)) {
+  $response->resultado = false;
+  $response->mensaje   = "Datos incompletos";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+}else{
+  $idActividad = mysqli_real_escape_string($conexion,$params->idActividad);
+  $dia = mysqli_real_escape_string($conexion,$params->dia);
+  $hora_inicio = mysqli_real_escape_string($conexion,$params->hora_inicio);
+  $hora_fin = mysqli_real_escape_string($conexion,$params->hora_fin);
+}
+
+try {      
+  $resultado = null;    
+  // Consulta SQL que se debe aplicar para el registro
+  $resultado = mysqli_query($conexion,"INSERT INTO `horarios` (`idHorario`,	`idActividad`,	`dia`,	`hora_inicio`,	`hora_fin`)
+  VALUES (NULL, '".$idActividad."', '".$dia."', '".$hora_inicio."', '".$hora_fin."');");
+}catch (Exception $e) {
+  $response->resultado = false; // Mensaje de error porque hubo algún error
+  $response->mensaje   = 'No se pudo registrar'; // Respuesta que se le dará al frontend
+  echo json_encode($response); // Respuesta de la API
+  exit();
+}
 
 if($resultado){ // Si la consulta SQL no dió error entrará en el if
   $response->resultado = true; // Mensaje de éxito porque ya se registró

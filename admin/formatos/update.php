@@ -1,17 +1,44 @@
 <?php
+header('Content-Type: text/html');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Credentials: true');
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
 
-$json = file_get_contents('php://input');
-$params = json_decode($json);
+class Result{} // Creacion de la clase
+$response = new Result(); // Instancia para la respuesta de la API
 
-require "../../config/conexion.php";
+if ($_SERVER['REQUEST_METHOD'] != 'PUT') {
+  $response->resultado = false;
+  $response->mensaje   = "Metodo incorrecto";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+} else {
+  $json   = file_get_contents('php://input'); // Tipo JSON para peticiones http
+  $params = json_decode($json); // Se guarda en la variable $params
+  require "../../config/conexion.php"; // Trae la conexión de la base de datos
+}
 
-$response = new Result();
-class Result {}
+if ($params == null) {
+  $response->resultado = false;
+  $response->mensaje   = "No hay datos para procesar";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+}
 
-$res = mysqli_query($conexion, "SELECT * FROM `formatos` WHERE `url`='".$params->url."' OR `formato` = '".$params->formato."'"); // Consulta para saber si ya existe ese valor
+if (!isset($params->url) || !isset($params->formato)) {
+  $response->resultado = false;
+  $response->mensaje   = "Datos incompletos";
+    
+  echo json_encode($response); // Respuesta de la API
+  exit();
+}else{
+  $url = mysqli_real_escape_string($conexion,$params->url);
+  $formato = mysqli_real_escape_string($conexion,$params->formato);
+}
+
+$res = mysqli_query($conexion, "SELECT * FROM `formatos` WHERE `url`='".$url."' OR `formato` = '".$formato."'"); // Consulta para saber si ya existe ese valor
    
 // Sino se necesita verificar que ya existe ese registro omitir el if y solo hacer la consulta
 
@@ -20,7 +47,17 @@ if($res->num_rows > 0) { // Si la consulta dió algún registro significa que ya
   $response->mensaje = 'Formato existente'; // Respuesta que se le dará al frontend
 }else{ // Si la consulta no dío algún registro significa que no existe y entra en el else
 
-  $resultado = mysqli_query($conexion,"UPDATE `formatos` SET `url` = '".$params->url."', `formato` = '".$params->formato."' WHERE `idFormato` = '".$_GET['idFormato']."'");
+  
+  try {      
+    $resultado = null;    
+    // Consulta SQL que se debe aplicar para el registro
+    $resultado = mysqli_query($conexion,"UPDATE `formatos` SET `url` = '".$url."', `formato` = '".$formato."' WHERE `idFormato` = '".$idFormato."'");
+  }catch (Exception $e) {
+    $response->resultado = false; // Mensaje de error porque hubo algún error
+    $response->mensaje   = 'No se pudo registrar'; // Respuesta que se le dará al frontend
+    echo json_encode($response); // Respuesta de la API
+      exit();
+  }
 
   if($resultado){
     $response->resultado = true;
@@ -31,6 +68,5 @@ if($res->num_rows > 0) { // Si la consulta dió algún registro significa que ya
   }
 }
 
-  header('Content-Type: text/html');
   echo json_encode($response);
   ?>
