@@ -16,12 +16,22 @@ if ($_SERVER['REQUEST_METHOD'] != 'GET') {
     require "../../config/conexion.php"; // Trae la conexión de la base de datos
 }
 // Consulta SQL que se debe aplicar para traer los registros
-$registros=mysqli_query($conexion,"SELECT * FROM `publicaciones`");
+$registros=mysqli_query($conexion,"SELECT * FROM `publicaciones` p inner join instructores ins on ins.idInstructor = p.idInstructor");
 
 $vec=[]; // Array donde se guardaran los registros
 
 // Ciclo while para recuperar fila por fila de la base de datos
 while ($reg=mysqli_fetch_array($registros)){
+    $registros2=mysqli_query($conexion,"SELECT count(*) as reaccion FROM reacciones where idPublicacion = '".$reg['idPublicacion']."'");
+    while ($reg2=mysqli_fetch_array($registros2)){
+        $reg['reacciones'] = $reg2['reaccion'];
+    }
+
+    $registros2=mysqli_query($conexion,"SELECT count(*) as comentario FROM comentarios where idPublicacion = '".$reg['idPublicacion']."'");
+    while ($reg2=mysqli_fetch_array($registros2)){
+        $reg['comentarios'] = $reg2['comentario'];
+    }
+
     $vec[]=$reg; // Asignamos al array los registros
 }
 

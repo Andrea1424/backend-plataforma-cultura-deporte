@@ -7,22 +7,25 @@ class Result{} // Creacion de la clase
 $response = new Result(); // Instancia para la respuesta de la API
 
 if ($_SERVER['REQUEST_METHOD'] != 'GET') {
-  $response->resultado = false;
-  $response->mensaje   = "Metodo incorrecto";
-    
-  echo json_encode($response); // Respuesta de la API
-  exit();
+    $response->resultado = false;
+    $response->mensaje   = "Metodo incorrecto";
+      
+    echo json_encode($response); // Respuesta de la API
+    exit();
 } else {
-  require "../../config/conexion.php"; // Trae la conexión de la base de datos
+    require "../../config/conexion.php"; // Trae la conexión de la base de datos
 }
-
 // Consulta SQL que se debe aplicar para traer los registros
-$registros=mysqli_query($conexion,"SELECT * FROM `carreras` where idCarrera != 100");
+$registros=mysqli_query($conexion,"select * from tipo_actividad");
 
 $vec=[]; // Array donde se guardaran los registros
 
 // Ciclo while para recuperar fila por fila de la base de datos
 while ($reg=mysqli_fetch_array($registros)){
+    $registros2=mysqli_query($conexion,"SELECT count(*) as cuenta FROM actividades where idTipoActividad = '".$reg['idTipoActividad']."'");
+    while ($reg2=mysqli_fetch_array($registros2)){
+        $reg['cuenta'] = $reg2['cuenta'];
+    }
     $vec[]=$reg; // Asignamos al array los registros
 }
 

@@ -16,37 +16,36 @@ if ($_SERVER['REQUEST_METHOD'] != 'GET') {
   require "../../config/conexion.php"; // Trae la conexión de la base de datos
 }
 
-if (!isset($_GET['idActividad'])) {
+if (!isset($_GET['matricula'])) {
     $response->resultado = false;
     $response->mensaje   = "Datos incompletos";
       
     echo json_encode($response); // Respuesta de la API
     exit();
   }else{
-    $idActividad = mysqli_real_escape_string($conexion,$_GET['idActividad']);
+    $matricula = mysqli_real_escape_string($conexion,$_GET['matricula']);
   }
+  
 // Consulta SQL que se debe aplicar para traer los registros
-$registros=mysqli_query($conexion,"SELECT * FROM `actividades` inner join instructores ins on ins.idInstructor = actividades.idInstructor WHERE `idActividad` = '".$idActividad."'");
+$registros=mysqli_query($conexion,"SELECT * FROM `usuarios` WHERE `matricula` = '".$matricula."'");
+
+if(!$registros->num_rows > 0) { // Si la consulta dió algún registro significa que ya existe y entra en el if
+    $response->resultado = false; // Mensaje de error porque ya existe un registro
+    $response->mensaje = 'Esa reaccion no existe'; // Respuesta que se le dará al frontend
+
+    echo json_encode($response); // Respuesta de la API
+    exit();
+}else{
 
 $vec; // Variable donde se guardara el registro obtenido
 
 // Ciclo while para recuperar fila por fila de la base de datos
 while ($reg=mysqli_fetch_array($registros)){
-  $registros2=mysqli_query($conexion,"SELECT * FROM horarios WHERE `idActividad` = '".$reg['idActividad']."'");
-    
-    // Ciclo while para recuperar fila por fila de la base de datos
-    while ($reg2=mysqli_fetch_array($registros2)){
-      $reg['horarios'][]=$reg2; // Asignamos al array los registros
-    }
-
-    $registros3=mysqli_query($conexion,"select count(*) as ocupados from actividades_usuarios WHERE `idActividad` = '".$reg['idActividad']."'");
-    while ($reg3=mysqli_fetch_array($registros3)){
-      $reg['ocupados']=$reg3['ocupados']; // Asignamos al array los registros
-    }
     $vec=$reg; // Asignamos a la variable el registro
 }
 
 $cad=json_encode($vec); // Codificamos en formato JSON la varible que contienen los registros
+}
 echo $cad; // Respuesta de la API
 
 ?>

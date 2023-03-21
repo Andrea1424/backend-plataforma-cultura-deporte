@@ -7,32 +7,33 @@ class Result{} // Creacion de la clase
 $response = new Result(); // Instancia para la respuesta de la API
 
 if ($_SERVER['REQUEST_METHOD'] != 'GET') {
-  $response->resultado = false;
-  $response->mensaje   = "Metodo incorrecto";
-    
-  echo json_encode($response); // Respuesta de la API
-  exit();
-} else {
-  require "../../config/conexion.php"; // Trae la conexión de la base de datos
-}
-
-if (!isset($_GET['idActividad'])) {
     $response->resultado = false;
-    $response->mensaje   = "Datos incompletos";
+    $response->mensaje   = "Metodo incorrecto";
       
     echo json_encode($response); // Respuesta de la API
     exit();
-  }else{
-    $idActividad = mysqli_real_escape_string($conexion,$_GET['idActividad']);
+  } else {
+    require "../../config/conexion.php"; // Trae la conexión de la base de datos
   }
-// Consulta SQL que se debe aplicar para traer los registros
-$registros=mysqli_query($conexion,"SELECT * FROM `actividades` inner join instructores ins on ins.idInstructor = actividades.idInstructor WHERE `idActividad` = '".$idActividad."'");
+  
+  if (!isset($_GET['idTipoActividad'])) {
+      $response->resultado = false;
+      $response->mensaje   = "Datos incompletos";
+        
+      echo json_encode($response); // Respuesta de la API
+      exit();
+    }else{
+      $idTipoActividad = mysqli_real_escape_string($conexion,$_GET['idTipoActividad']);
+    }
+  // Consulta SQL que se debe aplicar para traer los registros
+  $registros=mysqli_query($conexion,"SELECT * FROM `actividades` inner join instructores ins on ins.idInstructor = actividades.idInstructor WHERE `idTipoActividad` = '".$idTipoActividad."'");
 
-$vec; // Variable donde se guardara el registro obtenido
+$vec=[]; // Array donde se guardaran los registros
 
 // Ciclo while para recuperar fila por fila de la base de datos
 while ($reg=mysqli_fetch_array($registros)){
-  $registros2=mysqli_query($conexion,"SELECT * FROM horarios WHERE `idActividad` = '".$reg['idActividad']."'");
+
+    $registros2=mysqli_query($conexion,"SELECT * FROM horarios WHERE `idActividad` = '".$reg['idActividad']."'");
     
     // Ciclo while para recuperar fila por fila de la base de datos
     while ($reg2=mysqli_fetch_array($registros2)){
@@ -43,7 +44,7 @@ while ($reg=mysqli_fetch_array($registros)){
     while ($reg3=mysqli_fetch_array($registros3)){
       $reg['ocupados']=$reg3['ocupados']; // Asignamos al array los registros
     }
-    $vec=$reg; // Asignamos a la variable el registro
+    $vec[]=$reg; // Asignamos al array los registros
 }
 
 $cad=json_encode($vec); // Codificamos en formato JSON la varible que contienen los registros

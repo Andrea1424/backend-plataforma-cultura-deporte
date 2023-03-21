@@ -3,7 +3,7 @@
 //Conexión para la base de datos en un servidor
 
 $usr = "root"; //Usuario de la base de datos
-$pw = ""; // Contraseña de la base de datos
+$pw = "137946"; // Contraseña de la base de datos
 $db = "tutorias"; //Nombre de la base de datos
 $host = "localhost"; //Ip del servidor
 

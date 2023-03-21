@@ -7,17 +7,20 @@ class Result{} // Creacion de la clase
 $response = new Result(); // Instancia para la respuesta de la API
 
 if ($_SERVER['REQUEST_METHOD'] != 'GET') {
-  $response->resultado = false;
-  $response->mensaje   = "Metodo incorrecto";
-    
-  echo json_encode($response); // Respuesta de la API
-  exit();
+    $response->resultado = false;
+    $response->mensaje   = "Metodo incorrecto";
+      
+    echo json_encode($response); // Respuesta de la API
+    exit();
 } else {
-  require "../../config/conexion.php"; // Trae la conexión de la base de datos
+    require "../../config/conexion.php"; // Trae la conexión de la base de datos
 }
 
+$idActividad = mysqli_real_escape_string($conexion,$_GET['idActividad']);
+
+
 // Consulta SQL que se debe aplicar para traer los registros
-$registros=mysqli_query($conexion,"SELECT * FROM `carreras` where idCarrera != 100");
+$registros=mysqli_query($conexion,"SELECT * FROM tutorias.usuarios u inner join actividades_usuarios au on au.idUsuario = u.idUsuario inner join actividades a on a.idActividad = au.idActividad inner join carreras c on c.idCarrera = u.idCarrera where au.idActividad = '".$idActividad."'");
 
 $vec=[]; // Array donde se guardaran los registros
 

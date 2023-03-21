@@ -82,3 +82,14 @@ idFormato int(11) primary key auto_increment,
 url varchar(255) not null,
  formato varchar(255) not null 
 );
+
+create table tipo_actividad(
+	idTipoActividad int(11) primary KEY auto_increment,
+    tipoActividad varchar(255) not null
+);
+
+create table usuarios_login(
+	idLogin int(11) primary key auto_increment,
+    email varchar(255) not null,
+    password varchar(255) not null
+);

@@ -6,7 +6,7 @@
   class Result{} // Creacion de la clase
   $response = new Result(); // Instancia para la respuesta de la API
   
-  if ($_SERVER['REQUEST_METHOD'] != 'DELETE') {
+  if ($_SERVER['REQUEST_METHOD'] != 'GET') {
     $response->resultado = false;
     $response->mensaje   = "Metodo incorrecto";
       
@@ -16,17 +16,18 @@
     require "../../config/conexion.php"; // Trae la conexión de la base de datos
   }
 
-  if (!isset($_GET['idReaccion'])) {
+  if (!isset($_GET['idUsuario'])) {
     $response->resultado = false;
     $response->mensaje   = "Datos incompletos";
       
     echo json_encode($response); // Respuesta de la API
     exit();
   }else{
-    $idReaccion = mysqli_real_escape_string($conexion,$_GET['idReaccion']);
+    $idUsuario = mysqli_real_escape_string($conexion,$_GET['idUsuario']);
+    $idPublicacion = mysqli_real_escape_string($conexion,$_GET['idPublicacion']);
   }
 
-  $res = mysqli_query($conexion, "SELECT * FROM `reacciones` WHERE `idReaccion`='".$idReaccion."'"); // Consulta para saber si ya existe ese valor
+  $res = mysqli_query($conexion, "SELECT * FROM `reacciones` WHERE `idPublicacion`='".$idPublicacion."'"); // Consulta para saber si ya existe ese valor
    
 // Sino se necesita verificar que ya existe ese registro omitir el if y solo hacer la consulta
 
@@ -38,7 +39,7 @@ if(!$res->num_rows > 0) { // Si la consulta dió algún registro significa que y
 }else{
 
   // Consulta SQL que se debe aplicar para eliminar un registro
-  $delete = mysqli_query($conexion,"DELETE FROM `reacciones` WHERE `reacciones`.`idReaccion`= '".$idReaccion."'"); // Se obtiene de la peticion GET en la URL
+  $delete = mysqli_query($conexion,"DELETE FROM `reacciones` WHERE `reacciones`.`idUsuario`= '".$idUsuario."' AND idPublicacion = '".$idPublicacion."'"); // Se obtiene de la peticion GET en la URL
 
   if ($delete){ // Si funcionó la consulta entra en el if
     $response->resultado = true; // Mensaje de éxito porque ya se elimino
