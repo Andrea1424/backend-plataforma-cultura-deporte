@@ -39,16 +39,28 @@ if (!isset($params->idPublicacion) || !isset($params->idUsuario) || !isset($para
   $reaccion = mysqli_real_escape_string($conexion,$params->reaccion);
 }
 
-// Consulta SQL que se debe aplicar para el registro
-$resultado = mysqli_query($conexion,"INSERT INTO `reacciones` (`idReaccion`,	`idPublicacion`,	`idUsuario`,	`reaccion`)
-VALUES (NULL, '".$idPublicacion."', '".$idUsuario."', '".$reaccion."');");
+$registros1=mysqli_query($conexion,"SELECT * FROM `reacciones` WHERE `idPublicacion` = '".$idPublicacion."' and `idUsuario` = '".$idUsuario."'");
 
-if($resultado){ // Si la consulta SQL no dió error entrará en el if
-  $response->resultado = true; // Mensaje de éxito porque ya se registró
-  $response->mensaje = 'Datos guardados'; // Respuesta que se le dará al frontend
-} else { // Si la consulta SQL dió error entrará en el else
-  $response->resultado = true; // Mensaje de error porque hubo algún error
-  $response->mensaje = 'No se pudo registrar'; // Respuesta que se le dará al frontend
+if($registros1->num_rows > 0) { // Si la consulta dió algún registro significa que ya existe y entra en el if
+    $response->resultado = false; // Mensaje de error porque ya existe un registro
+    $response->mensaje = 'Ya has dado like a esa publicacion'; // Respuesta que se le dará al frontend
+
+    echo json_encode($response); // Respuesta de la API
+    exit();
+}else{
+
+  // Consulta SQL que se debe aplicar para el registro
+  $resultado = mysqli_query($conexion,"INSERT INTO `reacciones` (`idReaccion`,	`idPublicacion`,	`idUsuario`,	`reaccion`)
+  VALUES (NULL, '".$idPublicacion."', '".$idUsuario."', '".$reaccion."');");
+
+  if($resultado){ // Si la consulta SQL no dió error entrará en el if
+    $response->resultado = true; // Mensaje de éxito porque ya se registró
+    $response->mensaje = 'Datos guardados'; // Respuesta que se le dará al frontend
+  } else { // Si la consulta SQL dió error entrará en el else
+    $response->resultado = true; // Mensaje de error porque hubo algún error
+    $response->mensaje = 'No se pudo registrar'; // Respuesta que se le dará al frontend
+  }
+
 }
 
 echo json_encode($response); // Respuesta de la API

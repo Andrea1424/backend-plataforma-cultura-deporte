@@ -7,7 +7,7 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 class Result{} // Creacion de la clase
 $response = new Result(); // Instancia para la respuesta de la API
 
-if ($_SERVER['REQUEST_METHOD'] != 'PUT') {
+if ($_SERVER['REQUEST_METHOD'] != 'POST') {
   $response->resultado = false;
   $response->mensaje   = "Metodo incorrecto";
     
@@ -35,6 +35,7 @@ if (!isset($params->idInstructor) || !isset($_GET['idActividad']) || !isset($par
   exit();
 }else{
   $idActividad = mysqli_real_escape_string($conexion,$_GET['idActividad']);
+  $actividad = mysqli_real_escape_string($conexion,$params->actividad);
   $idInstructor = mysqli_real_escape_string($conexion,$params->idInstructor);
   $cupo = mysqli_real_escape_string($conexion,$params->cupo);
   $lugar = mysqli_real_escape_string($conexion,$params->lugar);
@@ -43,7 +44,7 @@ if (!isset($params->idInstructor) || !isset($_GET['idActividad']) || !isset($par
   $publicar = mysqli_real_escape_string($conexion,$params->publicar);
 }
 
-$res = mysqli_query($conexion, "SELECT * FROM `actividades` WHERE `actividad`='".$actividad."'"); // Consulta para saber si ya existe ese valor
+$res = mysqli_query($conexion, "SELECT * FROM `actividades` WHERE `actividad`='".$idActividad."'"); // Consulta para saber si ya existe ese valor
    
 // Sino se necesita verificar que ya existe ese registro omitir el if y solo hacer la consulta
 

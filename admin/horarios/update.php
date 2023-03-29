@@ -34,6 +34,7 @@ if (!isset($params->idActividad) || !isset($params->dia) || !isset($params->hora
   echo json_encode($response); // Respuesta de la API
   exit();
 }else{
+  $idHorario = mysqli_real_escape_string($conexion,$params->$idHorario);
   $idActividad = mysqli_real_escape_string($conexion,$params->idActividad);
   $dia = mysqli_real_escape_string($conexion,$params->dia);
   $hora_inicio = mysqli_real_escape_string($conexion,$params->hora_inicio);

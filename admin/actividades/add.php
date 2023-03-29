@@ -41,6 +41,7 @@ if (!isset($params->idInstructor) || !isset($params->actividad) || !isset($param
   $descripcion = mysqli_real_escape_string($conexion,$params->descripcion);
   $material = mysqli_real_escape_string($conexion,$params->material);
   $publicar = mysqli_real_escape_string($conexion,$params->publicar);
+  $idTipoActividad = mysqli_real_escape_string($conexion,$params->idTipoActividad);
 }
 
 $res = mysqli_query($conexion, "SELECT * FROM `actividades` WHERE `actividad`='" . $actividad . "'"); // Consulta para saber si ya existe ese valor
@@ -55,8 +56,8 @@ if ($res->num_rows > 0) { // Si la consulta dió algún registro significa que y
   try {      
     $resultado = null;    
     // Consulta SQL que se debe aplicar para el registro
-    $resultado = mysqli_query($conexion, "INSERT INTO `actividades` (`idActividad`, `idInstructor`, `actividad`, `cupo`, `lugar`, `descripcion`, `material`, `publicar`)
-    VALUES (NULL, '" . $idInstructor . "', '" . $actividad . "', '" . $cupo . "', '" . $lugar . "', '" . $descripcion . "', '" . $material . "', '" . $publicar . "');");
+    $resultado = mysqli_query($conexion, "INSERT INTO `actividades` (`idActividad`, `idInstructor`, `actividad`, `cupo`, `lugar`, `descripcion`, `material`, `publicar`, `idTipoActividad`)
+    VALUES (NULL, '" . $idInstructor . "', '" . $actividad . "', '" . $cupo . "', '" . $lugar . "', '" . $descripcion . "', '" . $material . "', '" . $publicar . "', '" . $idTipoActividad . "');");
   }catch (Exception $e) {
     $response->resultado = false; // Mensaje de error porque hubo algún error
     $response->mensaje   = 'No se pudo registrar'; // Respuesta que se le dará al frontend
